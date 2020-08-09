@@ -34,4 +34,17 @@ public class UserDto {
 
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "user")
     private List<RsEventDto> rsEventDtos;
+
+    @Override
+    public String toString() {
+        return "UserDto{" +
+                "id=" + id +
+                ", userName='" + userName + '\'' +
+                ", gender='" + gender + '\'' +
+                ", age=" + age +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", voteNum=" + voteNum +
+                '}';
+    }
 }

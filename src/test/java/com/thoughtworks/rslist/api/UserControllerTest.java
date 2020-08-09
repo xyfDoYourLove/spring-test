@@ -116,7 +116,7 @@ class UserControllerTest {
             .build();
     UserDto save = userRepository.save(userDto);
     RsEventDto rsEventDto =
-        RsEventDto.builder().keyword("keyword").eventName("eventName").user(save).build();
+        RsEventDto.builder().keyWord("keyWord").eventName("eventName").user(save).build();
     rsEventRepository.save(rsEventDto);
 
     mockMvc.perform(delete("/user/{id}", save.getId())).andExpect(status().isOk());

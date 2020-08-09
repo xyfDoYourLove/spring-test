@@ -1,9 +1,14 @@
 package com.thoughtworks.rslist.api;
 
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thoughtworks.rslist.domain.Trade;
 import com.thoughtworks.rslist.dto.RsEventDto;
+import com.thoughtworks.rslist.dto.TradeDto;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.repository.RsEventRepository;
+import com.thoughtworks.rslist.repository.TradeRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,16 +37,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class RsControllerTest {
   @Autowired private MockMvc mockMvc;
-  @Autowired UserRepository userRepository;
-  @Autowired RsEventRepository rsEventRepository;
-  @Autowired VoteRepository voteRepository;
+  @Autowired
+  UserRepository userRepository;
+
+  @Autowired
+  RsEventRepository rsEventRepository;
+
+  @Autowired
+  VoteRepository voteRepository;
+
+  @Autowired
+  TradeRepository tradeRepository;
+
   private UserDto userDto;
+
+  private RsEventDto rsEventDto;
 
   @BeforeEach
   void setUp() {
     voteRepository.deleteAll();
     rsEventRepository.deleteAll();
     userRepository.deleteAll();
+    tradeRepository.deleteAll();
     userDto =
         UserDto.builder()
             .voteNum(10)
@@ -58,7 +75,7 @@ class RsControllerTest {
     UserDto save = userRepository.save(userDto);
 
     RsEventDto rsEventDto =
-        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+        RsEventDto.builder().keyWord("无分类").eventName("第一条事件").user(save).build();
 
     rsEventRepository.save(rsEventDto);
 
@@ -66,7 +83,7 @@ class RsControllerTest {
         .perform(get("/rs/list"))
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].eventName", is("第一条事件")))
-        .andExpect(jsonPath("$[0].keyword", is("无分类")))
+        .andExpect(jsonPath("$[0].keyWord", is("无分类")))
         .andExpect(jsonPath("$[0]", not(hasKey("user"))))
         .andExpect(status().isOk());
   }
@@ -76,15 +93,15 @@ class RsControllerTest {
     UserDto save = userRepository.save(userDto);
 
     RsEventDto rsEventDto =
-        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+        RsEventDto.builder().keyWord("无分类").eventName("第一条事件").user(save).build();
 
     rsEventRepository.save(rsEventDto);
-    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).build();
+    rsEventDto = RsEventDto.builder().keyWord("无分类").eventName("第二条事件").user(save).build();
     rsEventRepository.save(rsEventDto);
     mockMvc.perform(get("/rs/1")).andExpect(jsonPath("$.eventName", is("第一条事件")));
-    mockMvc.perform(get("/rs/1")).andExpect(jsonPath("$.keyword", is("无分类")));
+    mockMvc.perform(get("/rs/1")).andExpect(jsonPath("$.keyWord", is("无分类")));
     mockMvc.perform(get("/rs/2")).andExpect(jsonPath("$.eventName", is("第二条事件")));
-    mockMvc.perform(get("/rs/2")).andExpect(jsonPath("$.keyword", is("无分类")));
+    mockMvc.perform(get("/rs/2")).andExpect(jsonPath("$.keyWord", is("无分类")));
   }
 
   @Test
@@ -100,35 +117,35 @@ class RsControllerTest {
     UserDto save = userRepository.save(userDto);
 
     RsEventDto rsEventDto =
-        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+        RsEventDto.builder().keyWord("无分类").eventName("第一条事件").user(save).build();
 
     rsEventRepository.save(rsEventDto);
-    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).build();
+    rsEventDto = RsEventDto.builder().keyWord("无分类").eventName("第二条事件").user(save).build();
     rsEventRepository.save(rsEventDto);
-    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第三条事件").user(save).build();
+    rsEventDto = RsEventDto.builder().keyWord("无分类").eventName("第三条事件").user(save).build();
     rsEventRepository.save(rsEventDto);
     mockMvc
         .perform(get("/rs/list?start=1&end=2"))
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].eventName", is("第一条事件")))
-        .andExpect(jsonPath("$[0].keyword", is("无分类")))
+        .andExpect(jsonPath("$[0].keyWord", is("无分类")))
         .andExpect(jsonPath("$[1].eventName", is("第二条事件")))
-        .andExpect(jsonPath("$[1].keyword", is("无分类")));
+        .andExpect(jsonPath("$[1].keyWord", is("无分类")));
     mockMvc
         .perform(get("/rs/list?start=2&end=3"))
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].eventName", is("第二条事件")))
-        .andExpect(jsonPath("$[0].keyword", is("无分类")))
+        .andExpect(jsonPath("$[0].keyWord", is("无分类")))
         .andExpect(jsonPath("$[1].eventName", is("第三条事件")))
-        .andExpect(jsonPath("$[1].keyword", is("无分类")));
+        .andExpect(jsonPath("$[1].keyWord", is("无分类")));
     mockMvc
         .perform(get("/rs/list?start=1&end=3"))
         .andExpect(jsonPath("$", hasSize(3)))
-        .andExpect(jsonPath("$[0].keyword", is("无分类")))
+        .andExpect(jsonPath("$[0].keyWord", is("无分类")))
         .andExpect(jsonPath("$[1].eventName", is("第二条事件")))
-        .andExpect(jsonPath("$[1].keyword", is("无分类")))
+        .andExpect(jsonPath("$[1].keyWord", is("无分类")))
         .andExpect(jsonPath("$[2].eventName", is("第三条事件")))
-        .andExpect(jsonPath("$[2].keyword", is("无分类")));
+        .andExpect(jsonPath("$[2].keyWord", is("无分类")));
   }
 
   @Test
@@ -137,7 +154,7 @@ class RsControllerTest {
     UserDto save = userRepository.save(userDto);
 
     String jsonValue =
-        "{\"eventName\":\"猪肉涨价了\",\"keyword\":\"经济\",\"userId\": " + save.getId() + "}";
+        "{\"eventName\":\"猪肉涨价了\",\"keyWord\":\"经济\",\"userId\": " + save.getId() + "}";
 
     mockMvc
         .perform(post("/rs/event").content(jsonValue).contentType(MediaType.APPLICATION_JSON))
@@ -146,14 +163,14 @@ class RsControllerTest {
     assertNotNull(all);
     assertEquals(all.size(), 1);
     assertEquals(all.get(0).getEventName(), "猪肉涨价了");
-    assertEquals(all.get(0).getKeyword(), "经济");
+    assertEquals(all.get(0).getKeyWord(), "经济");
     assertEquals(all.get(0).getUser().getUserName(), save.getUserName());
     assertEquals(all.get(0).getUser().getAge(), save.getAge());
   }
 
   @Test
   public void shouldAddRsEventWhenUserNotExist() throws Exception {
-    String jsonValue = "{\"eventName\":\"猪肉涨价了\",\"keyword\":\"经济\",\"userId\": 100}";
+    String jsonValue = "{\"eventName\":\"猪肉涨价了\",\"keyWord\":\"经济\",\"userId\": 100}";
     mockMvc
         .perform(post("/rs/event").content(jsonValue).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -163,7 +180,7 @@ class RsControllerTest {
   public void shouldVoteSuccess() throws Exception {
     UserDto save = userRepository.save(userDto);
     RsEventDto rsEventDto =
-        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+        RsEventDto.builder().keyWord("无分类").eventName("第一条事件").user(save).build();
     rsEventDto = rsEventRepository.save(rsEventDto);
 
     String jsonValue =
@@ -185,4 +202,33 @@ class RsControllerTest {
     assertEquals(voteDtos.size(), 1);
     assertEquals(voteDtos.get(0).getNum(), 1);
   }
+
+  @Test
+  public void shouldBuySuccess() throws Exception {
+    UserDto save = userRepository.save(userDto);
+    rsEventDto =
+            RsEventDto.builder()
+                    .eventName("我买热搜了")
+                    .keyWord("花钱了")
+                    .voteNum(5)
+                    .user(save)
+                    .build();
+    RsEventDto rsEventDtoSave = rsEventRepository.save(this.rsEventDto);
+
+    Trade trade = Trade.builder()
+            .amount(100)
+            .rankNum(1)
+            .build();
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(MapperFeature.USE_ANNOTATIONS, false);
+    String jsonString = objectMapper.writeValueAsString(trade);
+
+    mockMvc.perform(post("/rs/buy/" + rsEventDtoSave.getId())
+            .content(jsonString).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+    List<TradeDto> all = tradeRepository.findAll();
+    assertEquals(1, all.size());
+  }
+
 }

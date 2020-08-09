@@ -42,7 +42,7 @@ public class RsController {
                 item ->
                     RsEvent.builder()
                         .eventName(item.getEventName())
-                        .keyword(item.getKeyword())
+                        .keyword(item.getKeyWord())
                         .userId(item.getId())
                         .voteNum(item.getVoteNum())
                         .build())
@@ -61,7 +61,7 @@ public class RsController {
                 item ->
                     RsEvent.builder()
                         .eventName(item.getEventName())
-                        .keyword(item.getKeyword())
+                        .keyword(item.getKeyWord())
                         .userId(item.getId())
                         .voteNum(item.getVoteNum())
                         .build())
@@ -80,7 +80,7 @@ public class RsController {
     }
     RsEventDto build =
         RsEventDto.builder()
-            .keyword(rsEvent.getKeyword())
+            .keyWord(rsEvent.getKeyword())
             .eventName(rsEvent.getEventName())
             .voteNum(0)
             .user(userDto.get())
@@ -96,9 +96,12 @@ public class RsController {
   }
 
   @PostMapping("/rs/buy/{id}")
-  public ResponseEntity buy(@PathVariable int id, @RequestBody Trade trade){
-    rsService.buy(trade, id);
-    return ResponseEntity.ok().build();
+  public ResponseEntity buy(@PathVariable int id, @RequestBody @Valid Trade trade){
+    Boolean isSuccess = rsService.buy(trade, id);
+    if (isSuccess) {
+      return ResponseEntity.ok().build();
+    }
+    return ResponseEntity.badRequest().build();
   }
 
 

@@ -5,22 +5,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "rsEvent")
+@Table(name = "rs_event")
 public class RsEventDto {
   @Id @GeneratedValue private int id;
   private String eventName;
-  private String keyword;
+  private String keyWord;
   private int voteNum;
   @ManyToOne private UserDto user;
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "trade_id")
+  private TradeDto tradeDto;
 }

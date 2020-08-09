@@ -39,7 +39,7 @@ class VoteControllerTest {
         userDto = UserDto.builder().userName("idolice").age(19).email("a@b.com").gender("female")
                 .phone("18888888888").voteNum(10).build();
         userDto = userRepository.save(userDto);
-        rsEventDto = RsEventDto.builder().user(userDto).eventName("event name").keyword("keyword").voteNum(0)
+        rsEventDto = RsEventDto.builder().user(userDto).eventName("event name").keyWord("keyWord").voteNum(0)
                     .build();
         rsEventDto = rsEventRepository.save(rsEventDto);
         VoteDto voteDto = VoteDto.builder().user(userDto).rsEvent(rsEventDto).localDateTime(LocalDateTime.now())
